@@ -24,17 +24,19 @@ public class WebSocketClientService extends TextWebSocketHandler {
         this.repository = repository;
     }
 
-    public void connect(String serverIp, int serverPort) {
+    public int connect(String serverIp, int serverPort) {
         try {
             String uri = "ws://" + serverIp + ":" + serverPort + "/ws";
             this.session = client.doHandshake(this, uri).get();
         } 
         catch (Exception e) {
             e.fillInStackTrace();
+            return -1;
         }
+        return 0;
     }
     
-    public void disconnect() {
+    public int disconnect() {
         try {
             if (session != null) {
                 session.close();
@@ -42,7 +44,9 @@ public class WebSocketClientService extends TextWebSocketHandler {
         } 
         catch (Exception e) {
             e.fillInStackTrace();
+            return -1;
         }
+        return 0;
     }
 
     @Override

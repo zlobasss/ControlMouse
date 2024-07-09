@@ -16,12 +16,15 @@ public class ControlService {
         this.webSocketClient = webSocketClient;
     }
 
-    public void startServer() {
+    public boolean startServer() {
         Config config = configService.getConfig();
-        webSocketClient.connect(config.getServerIp(), config.getServerPort());
+        if (config == null) {
+            return false;
+        }
+        return webSocketClient.connect(config.getServerIp(), config.getServerPort()) == 0;
     }
 
-    public void stopServer() {
-        webSocketClient.disconnect();
+    public boolean stopServer() {
+        return webSocketClient.disconnect() == 0;
     }
 }
