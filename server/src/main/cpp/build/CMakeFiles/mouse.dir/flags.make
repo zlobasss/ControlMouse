@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/serge/IdeaProjects/ControlMouse/server/src/main/cpp/include -I/usr/local/include/libevdev-1.0
+CXX_INCLUDES = -I/home/serge/IdeaProjects/ControlMouse/server/src/main/cpp/include -I/usr/local/include/libevdev-1.0 -I/home/serge/IdeaProjects/ControlMouse/server/src/main/cpp/headers
 
 CXX_FLAGS = 
 

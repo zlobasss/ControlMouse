@@ -1,4 +1,5 @@
 package com.example.server.config;
+import com.example.server.MouseStartRequest;
 import com.example.server.service.MouseService;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -14,7 +15,6 @@ public class CustomWebSocketServer extends WebSocketServer {
 
     private static final Set<CustomWebSocketServer> clients = Collections.synchronizedSet(new HashSet<>());
     private final MouseService mouseService;
-    private volatile boolean running = false;
 
     public CustomWebSocketServer(InetSocketAddress address) {
         super(address);
@@ -37,14 +37,23 @@ public class CustomWebSocketServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String message) {
 
         System.out.println("Сообщение: " + message);
-        if ("start".equalsIgnoreCase(message)) {
-            running = true;
-            new Thread(() -> {
-                mouseService.start(conn);
-            }).start();
-        } else if ("stop".equalsIgnoreCase(message)) {
-            running = false;
-            conn.send("Stopped.");
+        String[] data = message.split("-");
+        if (data.length != 0) {
+            switch (data[0]) {
+                case "start":
+                    if (data.length != 4) {
+                        System.out.println("Неверное количество параметров");
+                        return;
+                    }
+                    MouseStartRequest request = new MouseStartRequest(data[1], data[2], data[3]);
+                    new Thread(() -> {
+                        mouseService.start(conn, request);
+                    }).start();
+                    break;
+                case "stop":
+                    conn.send("Stopped.");
+                    break;
+            }
         }
     }
 

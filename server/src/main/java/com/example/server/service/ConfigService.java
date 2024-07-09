@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConfigService {
 
-    private Config config;
+    private Config config = new Config();
 
     public Config getConfig() {
         return config;

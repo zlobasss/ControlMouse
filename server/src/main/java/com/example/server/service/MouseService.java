@@ -1,11 +1,13 @@
 package com.example.server.service;
 
+import com.example.server.MouseStartRequest;
 import com.example.server.config.CustomWebSocketServer;
 import org.java_websocket.WebSocket;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 
@@ -18,16 +20,26 @@ public class MouseService {
         sessionsProccess = new HashSet<>();
     }
 
-    public void start(WebSocket session) {
+    public void start(WebSocket session, MouseStartRequest request) {
         // Запуск мыши с C++
+
+        int frequency, x, y;
+
+        try {
+            frequency = Integer.parseInt(request.getFrequency());
+            x = Integer.parseInt(request.getX());
+            y = Integer.parseInt(request.getY());
+        } catch (Exception e) {
+            System.out.println("Не удалось конвертировать входные числа");
+            return;
+        }
+
         System.out.println("Запуск мыши");
         sessionsProccess.add(session);
-        int frequency = 30;
         int duration = 1000 / frequency;
-        int x = 200;
-        int y = 300;
 
         while (sessionsProccess.contains(session) && session.isOpen()) {
+
             LocalDateTime dateTime = LocalDateTime.now();
             String message = String.format("save-%s-%s-%s %s %s %s %s %s %s",
                     x,
