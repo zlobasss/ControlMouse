@@ -17,18 +17,19 @@ public class ControlService {
     }
 
     public boolean startServer() {
-        if (webSocketClient.isOpenSession()) {
-            System.out.println("Session already open");
-            return false;
-        }
         Config config = configService.getConfig();
         if (config == null) {
             return false;
         }
-        return webSocketClient.connect(config.getServerIp(), config.getServerPort()) == 0;
+        if (webSocketClient.connect(config.getServerIp(), config.getServerPort()) != 0) {
+            return false;
+        }
+        webSocketClient.sendMessage("start");
+        return true;
     }
 
     public boolean stopServer() {
+        webSocketClient.sendMessage("stop");
         return webSocketClient.disconnect() == 0;
     }
 }

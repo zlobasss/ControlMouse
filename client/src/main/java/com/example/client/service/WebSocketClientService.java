@@ -1,7 +1,6 @@
 package com.example.client.service;
 
-import com.example.client.entity.MousePosition;
-import com.example.client.repository.MousePositionRepository;
+import com.example.client.request.MousePositionRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,40 +16,49 @@ public class WebSocketClientService extends TextWebSocketHandler {
     private WebSocketSession session;
     private final StandardWebSocketClient client = new StandardWebSocketClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final MousePositionRepository repository;
+    private final MouseService service;
 
     public boolean isOpenSession() {
         return session != null && session.isOpen();
     }
 
     @Autowired
-    public WebSocketClientService(MousePositionRepository repository) {
-        this.repository = repository;
+    public WebSocketClientService(MouseService service) {
+        this.service = service;
     }
 
     public int connect(String serverIp, int serverPort) {
+        if (isOpenSession()) {
+            return -41;
+        }
+        String uri = "ws://" + serverIp + ":" + serverPort + "/ws";
         try {
-            String uri = "ws://" + serverIp + ":" + serverPort + "/ws";
             session = client.doHandshake(this, uri).get();
-            session.sendMessage(new TextMessage("start"));
         } 
         catch (Exception e) {
-            e.fillInStackTrace();
-            return -1;
+            return -42;
         }
         return 0;
     }
     
     public int disconnect() {
+        if (!isOpenSession()) {
+            return -43;
+        }
         try {
-            if (session != null) {
-                session.sendMessage(new TextMessage("stop"));
-                session.close();
-            }
-        } 
+            session.close();
+        }
         catch (Exception e) {
-            e.fillInStackTrace();
-            return -1;
+            return -44;
+        }
+        return 0;
+    }
+
+    public int sendMessage(String message) {
+        try {
+            session.sendMessage(new TextMessage(message));
+        } catch (Exception e) {
+            return -45;
         }
         return 0;
     }
@@ -58,9 +66,21 @@ public class WebSocketClientService extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
         String payload = message.getPayload();
-        MousePosition position = objectMapper.readValue(payload, MousePosition.class);
-
-        System.out.println("Принятые координаты: " + position);
-        repository.save(position);
+        String[] data = payload.split("-");
+        int response = -1;
+        switch (data[0]) {
+            case "save":
+                if (data.length != 4) {
+                    System.out.println("Неверный формат запроса от сервера");
+                    return;
+                }
+                MousePositionRequest request = new MousePositionRequest(data[1], data[2], data[3]);
+                response = service.save(request);
+                break;
+        }
+        if (response != 0) {
+            System.out.println("Запрос не выполнен");
+        }
+        System.out.println("Запрос выполнен");
     }
 }
