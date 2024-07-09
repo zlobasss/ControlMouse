@@ -1,9 +1,6 @@
 package com.example.client.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +8,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity(name = "mouse")
+@Table(name = "mouse_position")
+@Entity(name = "mouse_position")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,7 +19,16 @@ public class MousePosition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double x;
-    private double y;
-    private LocalDateTime dateTime;
+    private int x;
+    private int y;
+    private String dateTime;
+
+    @Override
+    public String toString() {
+        return "Mouse position { " +
+                "x = " + x +
+                ", y = " + y +
+                ", dateTime = " + dateTime +
+                " }";
+    }
 }

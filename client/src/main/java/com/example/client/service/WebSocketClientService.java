@@ -1,21 +1,28 @@
 package com.example.client.service;
 
+import com.example.client.entity.MousePosition;
+import com.example.client.repository.MousePositionRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import java.net.URI;
 
 @Component
 public class WebSocketClientService extends TextWebSocketHandler {
 
     private WebSocketSession session;
     private final StandardWebSocketClient client = new StandardWebSocketClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final MousePositionRepository repository;
+
+    @Autowired
+    public WebSocketClientService(MousePositionRepository repository) {
+        this.repository = repository;
+    }
 
     public void connect(String serverIp, int serverPort) {
         try {
@@ -39,7 +46,11 @@ public class WebSocketClientService extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        // Обработка сообщения о координатах мыши и сохранение их в БД.
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
+        String payload = message.getPayload();
+        MousePosition position = objectMapper.readValue(payload, MousePosition.class);
+
+        System.out.println("Принятые координаты: " + position);
+        repository.save(position);
     }
 }
