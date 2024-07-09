@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ControlMiceService.iml" filepath="$PROJECT_DIR$/.idea/ControlMiceService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ControlMouse.iml" filepath="$PROJECT_DIR$/.idea/ControlMouse.iml" />
     </modules>
   </component>
 </project>
