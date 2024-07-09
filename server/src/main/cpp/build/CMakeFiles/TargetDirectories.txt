@@ -1,0 +1,3 @@
+/home/serge/IdeaProjects/ControlMouse/server/src/main/cpp/build/CMakeFiles/mouse.dir
+/home/serge/IdeaProjects/ControlMouse/server/src/main/cpp/build/CMakeFiles/edit_cache.dir
+/home/serge/IdeaProjects/ControlMouse/server/src/main/cpp/build/CMakeFiles/rebuild_cache.dir

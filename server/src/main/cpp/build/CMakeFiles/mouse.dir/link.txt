@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/mouse.dir/src/main.cpp.o CMakeFiles/mouse.dir/src/vm.cpp.o -o mouse  -levdev 
