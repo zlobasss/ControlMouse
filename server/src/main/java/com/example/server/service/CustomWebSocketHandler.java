@@ -1,43 +1,64 @@
 package com.example.server.service;
 
-import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @ServerEndpoint("/ws")
-public class  {
+public class CustomWebSocketHandler extends TextWebSocketHandler {
+    private static final Set<WebSocketSession> sessions = Collections.synchronizedSet(new HashSet<>());
+    private final MouseService mouseService;
 
-    private static final CopyOnWriteArraySet<WebSocketServerService> webSocketSet = new CopyOnWriteArraySet<>();
-    private Session session;
+    @Autowired
+    public CustomWebSocketHandler() {
+        mouseService = new MouseService();
+    }
 
-    @OnOpen
-    public void onOpen(Session session) {
-        this.session = session;
-        webSocketSet.add(this);
+    @Autowired
+    public CustomWebSocketHandler(MouseService mouseService) {
+        this.mouseService = mouseService;
+    }
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        sessions.add(session);
         System.out.println("New connection: " + session.getId());
     }
 
-    @OnClose
-    public void onClose() {
-        webSocketSet.remove(this);
-        System.out.println("Connection closed: " + this.session.getId());
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        sessions.remove(session);
+        System.out.println("Connection closed: " + session.getId());
     }
 
-    @OnMessage
-    public void onMessage(String message) {
-        System.out.println("Message: " + message);
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        String payload = message.getPayload();
+        System.out.println("Received message: " + payload);
+
+        if ("start".equalsIgnoreCase(payload)) {
+            mouseService.start();
+        } else if ("stop".equalsIgnoreCase(payload)) {
+            mouseService.stop();
+        }
+
         broadcastMessage(message);
     }
 
-    private void broadcastMessage(String message) {
-        for (WebSocketServerService webSocketServerService : webSocketSet) {
+    private void broadcastMessage(TextMessage message) {
+        for (WebSocketSession session : sessions) {
             try {
-                webSocketServerService.session.getBasicRemote().sendText(message);
-            } catch (IOException e) {
+                session.sendMessage(message);
+            } catch (Exception e) {
                 e.fillInStackTrace();
             }
         }

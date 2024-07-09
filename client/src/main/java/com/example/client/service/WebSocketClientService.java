@@ -19,6 +19,10 @@ public class WebSocketClientService extends TextWebSocketHandler {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final MousePositionRepository repository;
 
+    public boolean isOpenSession() {
+        return session != null && session.isOpen();
+    }
+
     @Autowired
     public WebSocketClientService(MousePositionRepository repository) {
         this.repository = repository;
@@ -27,7 +31,8 @@ public class WebSocketClientService extends TextWebSocketHandler {
     public int connect(String serverIp, int serverPort) {
         try {
             String uri = "ws://" + serverIp + ":" + serverPort + "/ws";
-            this.session = client.doHandshake(this, uri).get();
+            session = client.doHandshake(this, uri).get();
+            session.sendMessage(new TextMessage("start"));
         } 
         catch (Exception e) {
             e.fillInStackTrace();
@@ -39,6 +44,7 @@ public class WebSocketClientService extends TextWebSocketHandler {
     public int disconnect() {
         try {
             if (session != null) {
+                session.sendMessage(new TextMessage("stop"));
                 session.close();
             }
         } 

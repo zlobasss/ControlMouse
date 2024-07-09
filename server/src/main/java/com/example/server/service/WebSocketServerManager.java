@@ -1,63 +1,54 @@
 package com.example.server.service;
 
+import com.example.server.config.CustomWebSocketServer;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
-import jakarta.websocket.server.ServerEndpoint;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import java.net.ServerSocket;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
-@Component
-@ServerEndpoint("/ws")
-public class WebSocketServerService {
+@Service
+public class WebSocketServerManager {
 
-    private Session session;
-    private static final CopyOnWriteArraySet<WebSocketServerService> webSocketSet = new CopyOnWriteArraySet<>();
+    private ScheduledExecutorService serverExecutor;
+    private CustomWebSocketServer server;
 
     @PostConstruct
     public void init() {
+        serverExecutor = Executors.newSingleThreadScheduledExecutor();
         System.out.println("WebSocket сервер инициализирован");
     }
 
     public void start(int port) {
         // Запуск WS сервера
-
-        System.out.println("Запуск WS: " + port);
+        server = new CustomWebSocketServer(new InetSocketAddress(port));
+        serverExecutor.submit(() -> {
+           try {
+               server.start();
+               System.out.println("Запуск WS: " + port);
+           } catch (Exception e) {
+               e.fillInStackTrace();
+           }
+        });
     }
 
     public void stop() {
         // Остановка WS сервера
-
-        System.out.println("Остановка WS");
+        if (server != null) {
+            try {
+                server.stop();
+                System.out.println("Остановка WS сервера");
+            } catch (Exception e) {
+                e.fillInStackTrace();
+            }
+        }
     }
 
     @PreDestroy
     public void destroy() {
         stop();
-    }
-
-    @OnOpen
-    public void onOpen(Session session) {
-        this.session = session;
-        webSocketSet.add(this);
-        System.out.println("Новое соединение: " + session.getId());
-    }
-
-    @OnClose
-    public void onClose() {
-        webSocketSet.remove(this);
-        System.out.println("Закрыто соединение: " + this.session.getId());
-    }
-
-    @OnMessage
-    public void onMessage(String message) {
-        // Обработка сообщения клиента
-
-        System.out.println("Сообщение: " + message);
+        serverExecutor.shutdown();
     }
 }

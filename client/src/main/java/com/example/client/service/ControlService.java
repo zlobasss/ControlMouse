@@ -17,6 +17,10 @@ public class ControlService {
     }
 
     public boolean startServer() {
+        if (webSocketClient.isOpenSession()) {
+            System.out.println("Session already open");
+            return false;
+        }
         Config config = configService.getConfig();
         if (config == null) {
             return false;

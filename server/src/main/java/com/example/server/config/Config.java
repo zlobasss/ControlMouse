@@ -13,8 +13,5 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class Config {
 
-    private String serverIp;
-    private int serverPort;
-    private int frequency;
-
+    private int port;
 }

@@ -1,15 +1,17 @@
-package com.example.server.controller;
+package com.example.server.service;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
-public class MouseController {
+@Service
+public class MouseService {
 
     public void start() {
         // Запуск мыши с C++
+        System.out.println("Запуск мыши");
     }
 
     public void stop() {
-        // З мыши с C++
+        // Остановка мыши с C++
+        System.out.println("Остановка мыши");
     }
 }
