@@ -48,7 +48,7 @@ public class MouseService {
         Timestamp dateTime;
         try {
             LocalDateTime localDateTime = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSeconds);
-            dateTime = Timestamp.from(Instant.from(localDateTime));
+            dateTime = Timestamp.valueOf(localDateTime);
         } catch (Exception e) {
             System.out.println("Не удалось конвертировать дату");
             System.out.println(dto.getDateTime());

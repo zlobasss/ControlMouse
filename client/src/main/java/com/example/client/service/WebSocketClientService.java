@@ -72,6 +72,8 @@ public class WebSocketClientService extends TextWebSocketHandler {
             case "save":
                 if (data.length != 4) {
                     System.out.println("Неверный формат запроса от сервера");
+                    System.out.println(data.length);
+                    System.out.println(payload);
                     return;
                 }
                 MousePositionRequest request = new MousePositionRequest(data[1], data[2], data[3]);
@@ -80,6 +82,7 @@ public class WebSocketClientService extends TextWebSocketHandler {
         }
         if (response != 0) {
             System.out.println("Запрос не выполнен");
+            return;
         }
         System.out.println("Запрос выполнен");
     }

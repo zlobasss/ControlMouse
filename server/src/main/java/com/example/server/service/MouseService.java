@@ -1,17 +1,67 @@
 package com.example.server.service;
 
+import com.example.server.config.CustomWebSocketServer;
+import org.java_websocket.WebSocket;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
 
 @Service
 public class MouseService {
 
-    public void start() {
-        // Запуск мыши с C++
-        System.out.println("Запуск мыши");
+    private HashSet<WebSocket> sessionsProccess;
+
+    public MouseService () {
+        sessionsProccess = new HashSet<>();
     }
 
-    public void stop() {
+    public void start(WebSocket session) {
+        // Запуск мыши с C++
+        System.out.println("Запуск мыши");
+        sessionsProccess.add(session);
+        int frequency = 30;
+        int duration = 1000 / frequency;
+        int x = 200;
+        int y = 300;
+
+        while (sessionsProccess.contains(session) && session.isOpen()) {
+            LocalDateTime dateTime = LocalDateTime.now();
+            String message = String.format("save-%s-%s-%s %s %s %s %s %s %s",
+                    x,
+                    y,
+                    dateTime.getYear(),
+                    dateTime.getMonthValue(),
+                    dateTime.getDayOfMonth(),
+                    dateTime.getHour(),
+                    dateTime.getMinute(),
+                    dateTime.getSecond(),
+                    dateTime.getNano());
+
+            try {
+                session.send(message);
+                System.out.println("Отправлено");
+            } catch (Exception e) {
+                System.out.println("Не удалось отправить сообщение");
+            }
+            try {
+                Thread.sleep(duration);
+            } catch (Exception e) {
+                System.out.println("Не удалось сделать задержку");
+            }
+        }
+    }
+
+    public void stop(WebSocket session) {
         // Остановка мыши с C++
+
+        if (!sessionsProccess.contains(session)) {
+            System.out.println("Процесс даже не запущен");
+            return;
+        }
+        sessionsProccess.remove(session);
         System.out.println("Остановка мыши");
     }
 }
